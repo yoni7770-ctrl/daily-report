@@ -585,30 +585,35 @@
         let blocksDescText = "";
 
         if (lot === 'מגרש 12') {
-            const collectBld = (name, prefix) => {
-                const s = document.getElementById(prefix + '_skeleton').value;
-                const b = document.getElementById(prefix + '_blocks').value;
-                const f = document.getElementById(prefix + '_finishing').value;
-                const p = document.getElementById(prefix + '_plumbing').value;
-                const e = document.getElementById(prefix + '_electrical').value;
-                let res = "";
-                if(s) res += `שלד: ${s} `;
-                if(b) res += `בלוקים: ${b} `;
-                if(f) res += `גמר: ${f} `;
-                if(p) res += `אינסטלציה: ${p} `;
-                if(e) res += `חשמל: ${e} `;
-                return res ? `${name}: ${res}` : "";
-            };
+            let skelArr = [];
+            let blockArr = [];
+            let finishArr = [];
 
-            const b121 = collectBld("121", "b121");
-            const b122 = collectBld("122", "b122");
-            const b123 = collectBld("123", "b123");
-            const b124 = collectBld("124", "b124");
-            const parking = document.getElementById('parkingWorks').value;
+            ["121", "122", "123", "124"].forEach(bld => {
+                const s = document.getElementById('b' + bld + '_skeleton').value.trim();
+                const b = document.getElementById('b' + bld + '_blocks').value.trim();
+                const f = document.getElementById('b' + bld + '_finishing').value.trim();
+                const p = document.getElementById('b' + bld + '_plumbing').value.trim();
+                const e = document.getElementById('b' + bld + '_electrical').value.trim();
 
-            skeletonDescText = [b121, b122, b123, b124, parking].filter(Boolean).join(" | ");
-            finishingDescText = skeletonDescText;
-            blocksDescText = skeletonDescText;
+                if (s) skelArr.push(`בניין ${bld}: ${s}`);
+                if (b) blockArr.push(`בניין ${bld}: ${b}`);
+                
+                let finParts = [];
+                if (f) finParts.push(f);
+                if (p) finParts.push(`אינסטלציה: ${p}`);
+                if (e) finParts.push(`חשמל: ${e}`);
+                if (finParts.length > 0) {
+                    finishArr.push(`בניין ${bld}: ${finParts.join(' | ')}`);
+                }
+            });
+
+            const parking = document.getElementById('parkingWorks').value.trim();
+            if (parking) finishArr.push(`חניונים ומחסנים: ${parking}`);
+
+            skeletonDescText = skelArr.join(" | ");
+            blocksDescText = blockArr.join(" | ");
+            finishingDescText = finishArr.join(" | ");
         } else {
             skeletonDescText = document.getElementById('genSkeletonWorks').value || "עבודות שלד כלליות";
             finishingDescText = document.getElementById('genFinishingWorks').value || "עבודות גמר כלליות";
