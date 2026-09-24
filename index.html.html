@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏗️ טופס דיווח יומי - אתר בנייה</title>
+    <style>
+        :root {
+            --primary: #1F4E78;
+            --bg: #F4F6F9;
+            --card-bg: #FFFFFF;
+            --accent: #27AE60;
+            --system-btn: #8E44AD;
+            --danger: #E74C3C;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 15px;
+            color: #333;
+        }
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        h1 { text-align: center; color: var(--primary); font-size: 1.4rem; margin-top: 0; }
+        h2 { color: var(--primary); font-size: 1.1rem; border-bottom: 2px solid var(--bg); padding-bottom: 5px; margin-top: 0; }
+        h3 { color: var(--primary); font-size: 0.95rem; margin-top: 15px; margin-bottom: 5px; background: #EBF5FB; padding: 6px 10px; border-radius: 6px; }
+        .sub-desc { font-size: 0.85rem; color: #666; margin-bottom: 12px; }
+        label { font-weight: bold; font-size: 0.9rem; display: block; margin-top: 10px; margin-bottom: 4px; }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #CCC;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 0.95rem;
+        }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .hidden { display: none; }
+        button {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button.copy-btn { background-color: var(--accent); margin-top: 8px; }
+        button.system-btn { background-color: var(--system-btn); margin-top: 8px; }
+        button.add-btn { background-color: #2980B9; font-size: 0.95rem; padding: 10px; margin-top: 10px; }
+        button.remove-btn { background-color: var(--danger); font-size: 0.85rem; padding: 6px 10px; width: auto; margin-top: 5px; }
+        textarea.out-box { background: #EBF5FB; font-family: monospace; direction: rtl; }
+        
+        .pour-item {
+            background: #FAFAFA;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .pour-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏗️ טופס דיווח יומי - אתר בנייה</h1>
+
+    <!-- חלק 1: פרטי הדיווח הכלליים -->
+    <div class="card">
+        <h2>חלק 1: פרטי הדיווח הכלליים</h2>
+        <div class="sub-desc">נתונים אלו יופיעו בכותרת הדיווח וישמשו לשיוך הנתונים באקסלים.</div>
+        
+        <div class="grid-2">
+            <div>
+                <label>מגרש / אתר</label>
+                <select id="lot" onchange="toggleLotView()">
+                    <option value="מגרש 12" selected>מגרש 12</option>
+                    <option value="מגרש 8">מגרש 8</option>
+                    <option value="מגרש 13">מגרש 13</option>
+                </select>
+            </div>
+            <div>
+                <label>תאריך דיווח</label>
+                <input type="date" id="reportDate">
+            </div>
+        </div>
+        <label>שם מדווח / מנהל עבודה</label>
+        <input type="text" id="reporterName" placeholder="שם מנהל העבודה" value="יונתן ליברמן">
+    </div>
+
+    <!-- חלק 2: מנופאים וצוות ניהול -->
+    <div class="card">
+        <h2>חלק 2: מנופאים וצוות ניהול (נפרד מכוח אדם)</h2>
+        
+        <h3>👷 מנופאים</h3>
+        <div class="grid-2">
+            <div>
+                <label>מנוף 1 - שם מנופאי</label>
+                <input type="text" id="crane1Name" value="איהד עגלוני">
+            </div>
+            <div>
+                <label>מנוף 1 - שעות עבודה</label>
+                <input type="text" id="crane1Hours" placeholder="06:30 - 18:30" value="06:30 - 18:30">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div>
+                <label>מנוף 2 - שם מנופאי</label>
+                <input type="text" id="crane2Name" value="אלסעדה">
+            </div>
+            <div>
+                <label>מנוף 2 - שעות עבודה</label>
+                <input type="text" id="crane2Hours" placeholder="06:30 - 18:30" value="06:30 - 18:30">
+            </div>
+        </div>
+
+        <h3>👨‍💼 צוות האתר / ניהול</h3>
+        <label>שמות צוות הניהול</label>
+        <input type="text" id="team" placeholder="למשל: יוסף – מנהל פרויקט, עידן, לוין" value="יוסף – מנהל פרויקט, עידן, לוין">
+
+        <h3>👷 כוח אדם מקצועי באתר</h3>
+        <div class="grid-3">
+            <div>
+                <label>📐 פועלי שלד</label>
+                <input type="number" id="skeletonCount" value="28">
+            </div>
+            <div>
+                <label>🧱 פועלי בלוקים</label>
+                <input type="number" id="blockCount" value="3">
+            </div>
+            <div>
+                <label>🎨 פועלי גמרים</label>
+                <input type="number" id="finishCount" value="8">
+            </div>
+        </div>
+    </div>
+
+    <!-- חלק 3: פירוט עבודות וקדמה לפי בניינים -->
+    <div class="card">
+        <h2>חלק 3: פירוט עבודות וקדמה (עבור הודעת הוואטסאפ)</h2>
+
+        <!-- תתי פרקים למגרש 12 -->
+        <div id="lot12Section">
+            <h3>🏢 בניין 121</h3>
+            <textarea id="b121Works" rows="3" placeholder="עבודות שלד, גמרים, חשמל, אינסטלציה בבניין 121">יציקת תקרה קומה 8- 95 קוב&#10;צוות אינסטלציה קומה 6&#10;צוות חשמל קומה 5&#10;הוצאת פסולת עי משאית מנוף+הכנסת חומרי מליטה</textarea>
+
+            <h3>🏢 בניין 122</h3>
+            <textarea id="b122Works" rows="3" placeholder="עבודות שלד, גמרים, בלוקים בבניין 122">טפסנות קירות קומה 6&#10;בנאי בלוק קומה 3</textarea>
+
+            <h3>🏢 בניין 123</h3>
+            <textarea id="b123Works" rows="3" placeholder="עבודות שלד, גמרים, אינסטלציה בבניין 123">טפסנות תקרה קומה 6&#10;יציקת קירות פנים- 5 קוב&#10;צוות אינסטלציה קומת קרקע</textarea>
+
+            <h3>🏢 בניין 124</h3>
+            <textarea id="b124Works" rows="3" placeholder="עבודות שלד, גמרים, אינסטלציה, טיח בבניין 124">יציקת קירות קומה 9 מקטע B-25 קוב&#10;טיח דירות קומת קרקע+מייקים קומה 1&#10;בנאי בלוק קומה 6&#10;התקנת צנרת אינסטלציה בפירים(לובאים)</textarea>
+
+            <h3>🚗 חניונים ומחסנים</h3>
+            <textarea id="parkingWorks" rows="3" placeholder="פירוט עבודות בחניונים ובמחסנים">*חניון 1*&#10;סדר , ארגון וניקיון&#10;&#10;*חניון 2*&#10;אין פעילות</textarea>
+        </div>
+
+        <!-- תתי פרקים כלליים למגרש 8 / 13 -->
+        <div id="generalLotSection" class="hidden">
+            <label>📐 עבודות שלד (סטטוס ופירוט)</label>
+            <textarea id="genSkeletonWorks" rows="3" placeholder="ניקיון והוצאת חומר מקומה 8..."></textarea>
+
+            <label>🎨 עבודות גמרים</label>
+            <textarea id="genFinishingWorks" rows="3" placeholder="טיח גבס, ריצוף..."></textarea>
+
+            <label>👷🏼‍♂️ קבלני משנה (חשמל, אינסטלציה, גבס)</label>
+            <textarea id="genSubcontractors" rows="3" placeholder="חשמל, אינסטלציה..."></textarea>
+        </div>
+    </div>
+
+    <!-- חלק 4: פועלים ביומית -->
+    <div class="card">
+        <h2>חלק 4: פועלים ביומית (מזין ישירות ל-מעקב יומיות.xlsx)</h2>
+
+        <label>האם היו פועלים ביומית היום?</label>
+        <select id="hadDailyLabor" onchange="toggleSection('dailyLaborFields', this.value)">
+            <option value="לא">לא</option>
+            <option value="כן" selected>כן</option>
+        </select>
+
+        <div id="dailyLaborFields">
+            <div class="grid-2">
+                <div>
+                    <label>כמות פועלים</label>
+                    <input type="number" id="dailyLaborCount" value="1">
+                </div>
+                <div>
+                    <label>קבלן פועלים</label>
+                    <input type="text" id="dailyLaborContractor" value="שלד">
+                </div>
+            </div>
+
+            <label>תיאור העבודה</label>
+            <input type="text" id="dailyLaborDesc" value="סיתות פירי אינסטלציה בניין 124 קומות 1-4">
+
+            <div class="grid-2">
+                <div>
+                    <label>שעות עבודה</label>
+                    <input type="text" id="dailyLaborHours" value="07:30 - 19:00">
+                </div>
+                <div>
+                    <label>האם לחיוב קבלן?</label>
+                    <select id="isContractorCharge" onchange="toggleSection('chargeNameDiv', this.value)">
+                        <option value="לא">לא</option>
+                        <option value="כן" selected>כן</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="chargeNameDiv">
+                <label>שם קבלן לחיוב</label>
+                <input type="text" id="chargeContractorName" value="קבלן שלד">
+            </div>
+        </div>
+    </div>
+
+    <!-- חלק 5: כלי עפר וציוד -->
+    <div class="card">
+        <h2>חלק 5: כלי עפר וציוד (מזין ישירות ל-מעקב כלי עפר.xlsx)</h2>
+
+        <label>האם פעל ציוד/כלי עפר היום?</label>
+        <select id="hadEquipment" onchange="toggleSection('equipmentFields', this.value)">
+            <option value="לא">לא</option>
+            <option value="כן" selected>כן</option>
+        </select>
+
+        <div id="equipmentFields">
+            <div class="grid-2">
+                <div>
+                    <label>סוג הכלי / ציוד</label>
+                    <input type="text" id="equipType" value="משאבה 75 מ׳">
+                </div>
+                <div>
+                    <label>שעות עבודה</label>
+                    <input type="text" id="equipHours" value="8 שעות">
+                </div>
+            </div>
+            <label>הערות / פירוט עבודה</label>
+            <input type="text" id="equipNotes" value="יציקות בבניינים 121, 123, 124">
+        </div>
+    </div>
+
+    <!-- חלק 6: מעקב יציקות ובטון (עם אייקון מערבל 🚛) -->
+    <div class="card">
+        <h2>חלק 6: מעקב יציקות ובטון (מזין ישירות ל-ריכוז כמויות בטון.xlsx)</h2>
+
+        <label>האם בוצעה יציקת בטון היום?</label>
+        <select id="hadPour" onchange="toggleSection('pourSectionFields', this.value)">
+            <option value="לא">לא</option>
+            <option value="כן" selected>כן</option>
+        </select>
+
+        <div id="pourSectionFields">
+            <div id="poursContainer">
+                <!-- יציקות יתווספו לכאן דינמית -->
+            </div>
+            <button type="button" class="add-btn" onclick="addPourItem()">➕ הוסף יציקה נוספת</button>
+        </div>
+    </div>
+
+    <!-- לחצן הפקת הודעה -->
+    <button onclick="generateWhatsApp()">📱 צור הודעת WhatsApp</button>
+
+    <!-- תוצר סופי -->
+    <div class="card hidden" id="outputCard">
+        <h2>📲 ההודעה המוכנה לשליחה</h2>
+        <textarea id="outputMsg" class="out-box" rows="18" readonly></textarea>
+        <button class="copy-btn" onclick="copyText()">📋 העתק הודעה</button>
+        <button class="system-btn" onclick="sendToSystem()">🚀 שלח סטטוס למערכת</button>
+    </div>
+
+</div>
+
+<script>
+    let pourCount = 0;
+
+    // הגדרת תאריך ברירת מחדל להיום
+    document.getElementById('reportDate').valueAsDate = new Date();
+
+    // הוספת יציקה ראשונה כברירת מחדל בטעינת העמוד (עם מערבל בטון 🚛)
+    window.onload = function() {
+        addPourItem("121", "קומה 8", "תקרה", "ב-30", "95", "מערבל בטון 🚛");
+    };
+
+    function addPourItem(bld = '', floor = '', elem = '', type = 'ב-30', vol = '', method = 'מערבל בטון 🚛') {
+        pourCount++;
+        const container = document.getElementById('poursContainer');
+        const div = document.createElement('div');
+        div.className = 'pour-item';
+        div.id = `pour_item_${pourCount}`;
+
+        div.innerHTML = `
+            <div class="pour-header">
+                <span>🚛 יציקה #${pourCount}</span>
+                ${pourCount > 1 ? `<button type="button" class="remove-btn" onclick="removePourItem(${pourCount})">🗑️ הסר</button>` : ''}
+            </div>
+            <div class="grid-3">
+                <div>
+                    <label>בניין</label>
+                    <input type="text" class="pourBuilding" value="${bld}">
+                </div>
+                <div>
+                    <label>קומה</label>
+                    <input type="text" class="pourFloor" value="${floor}">
+                </div>
+                <div>
+                    <label>אלמנט</label>
+                    <input type="text" class="pourElement" value="${elem}">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div>
+                    <label>סוג בטון</label>
+                    <select class="pourConcreteType">
+                        <option value="ב-30" ${type === 'ב-30' ? 'selected' : ''}>ב-30</option>
+                        <option value="ב-40" ${type === 'ב-40' ? 'selected' : ''}>ב-40</option>
+                        <option value="ב-20" ${type === 'ב-20' ? 'selected' : ''}>ב-20</option>
+                        <option value="ב-50" ${type === 'ב-50' ? 'selected' : ''}>ב-50</option>
+                        <option value="ב-60" ${type === 'ב-60' ? 'selected' : ''}>ב-60</option>
+                        <option value="CLSM" ${type === 'CLSM' ? 'selected' : ''}>CLSM</option>
+                    </select>
+                </div>
+                <div>
+                    <label>כמות במשאבה (מ"ק)</label>
+                    <input type="number" class="pourVolume" value="${vol}">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div>
+                    <label>אמצעי יציקה</label>
+                    <input type="text" class="pourMethod" value="${method}">
+                </div>
+                <div>
+                    <label>מספר תעודת בטון</label>
+                    <input type="text" class="pourDocNum" placeholder="מספר תעודה">
+                </div>
+            </div>
+            <label>הערות יציקה</label>
+            <input type="text" class="pourNotes" placeholder="הערות נוספות">
+        `;
+        container.appendChild(div);
+    }
+
+    function removePourItem(id) {
+        const item = document.getElementById(`pour_item_${id}`);
+        if(item) item.remove();
+    }
+
+    function toggleLotView() {
+        const lot = document.getElementById('lot').value;
+        if(lot === 'מגרש 12') {
+            document.getElementById('lot12Section').classList.remove('hidden');
+            document.getElementById('generalLotSection').classList.add('hidden');
+        } else {
+            document.getElementById('lot12Section').classList.add('hidden');
+            document.getElementById('generalLotSection').classList.remove('hidden');
+        }
+    }
+
+    function toggleSection(id, val) {
+        const el = document.getElementById(id);
+        if(val === 'כן') {
+            el.classList.remove('hidden');
+        } else {
+            el.classList.add('hidden');
+        }
+    }
+
+    function generateWhatsApp() {
+        const lot = document.getElementById('lot').value;
+        const rawDate = new Date(document.getElementById('reportDate').value);
+        
+        const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+        const dayName = days[rawDate.getDay()];
+        const formattedDate = rawDate.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+        const crane1Name = document.getElementById('crane1Name').value.trim();
+        const crane1Hours = document.getElementById('crane1Hours').value.trim();
+        const crane2Name = document.getElementById('crane2Name').value.trim();
+        const crane2Hours = document.getElementById('crane2Hours').value.trim();
+        
+        const team = document.getElementById('team').value.trim();
+        const reporter = document.getElementById('reporterName').value.trim();
+
+        let msg = `📋 *סטטוס ${lot}*\n`;
+        msg += `📅 *יום ${dayName} | ${formattedDate}*\n`;
+        if(reporter) msg += `👤 *מדווח:* ${reporter}\n`;
+        msg += `\n`;
+
+        if(crane1Name || crane2Name) {
+            msg += `👷 *מנופאים*\n`;
+            if(crane1Name) msg += `🔹 מנוף 1 – ${crane1Name}${crane1Hours ? ' (' + crane1Hours + ')' : ''}\n`;
+            if(crane2Name) msg += `🔹 מנוף 2 – ${crane2Name}${crane2Hours ? ' (' + crane2Hours + ')' : ''}\n`;
+            msg += `\n`;
+        }
+
+        if(team) {
+            msg += `👨‍💼 *צוות האתר*\n`;
+            team.split(',').forEach(t => msg += `🔹 ${t.trim()}\n`);
+            msg += `\n`;
+        }
+
+        msg += `🏗️ *עבודות שלד וגמרים*\n\n`;
+
+        if(lot === 'מגרש 12') {
+            const addBld = (name, id) => {
+                const val = document.getElementById(id).value.trim();
+                if(val) {
+                    msg += `🏢 *${name}*\n`;
+                    val.split('\n').forEach(line => {
+                        if(line.trim()) msg += `▪️ ${line.trim()}\n`;
+                    });
+                    msg += `\n`;
+                }
+            };
+            addBld('בניין 121', 'b121Works');
+            addBld('בניין 122', 'b122Works');
+            addBld('בניין 123', 'b123Works');
+            addBld('בניין 124', 'b124Works');
+        } else {
+            const skel = document.getElementById('genSkeletonWorks').value.trim();
+            const fin = document.getElementById('genFinishingWorks').value.trim();
+            const sub = document.getElementById('genSubcontractors').value.trim();
+
+            if(skel) msg += `📐 *עבודות שלד:*\n${skel}\n\n`;
+            if(fin) msg += `🎨 *עבודות גמרים:*\n${fin}\n\n`;
+            if(sub) msg += `👷🏼‍♂️ *קבלני משנה:*\n${sub}\n\n`;
+        }
+
+        if(document.getElementById('hadPour').value === 'כן') {
+            const pourItems = document.querySelectorAll('.pour-item');
+            if(pourItems.length > 0) {
+                msg += `🚛 *יציקות בטון שנערכו היום:*\n`;
+                let totalVol = 0;
+                pourItems.forEach((item, index) => {
+                    const bld = item.querySelector('.pourBuilding').value.trim();
+                    const floor = item.querySelector('.pourFloor').value.trim();
+                    const elem = item.querySelector('.pourElement').value.trim();
+                    const type = item.querySelector('.pourConcreteType').value;
+                    const vol = item.querySelector('.pourVolume').value.trim();
+                    const notes = item.querySelector('.pourNotes').value.trim();
+
+                    if(vol) totalVol += parseFloat(vol) || 0;
+
+                    msg += `▪️ *יציקה ${index + 1}:* `;
+                    let details = [];
+                    if(bld) details.push(`בניין ${bld}`);
+                    if(floor) details.push(floor);
+                    if(elem) details.push(elem);
+                    if(vol) details.push(`${vol} מ"ק`);
+                    if(type) details.push(`בטון ${type}`);
+
+                    msg += details.join(' | ');
+                    if(notes) msg += ` (${notes})`;
+                    msg += `\n`;
+                });
+                if(totalVol > 0) msg += `📊 *סה"כ בטון שנצק:* ${totalVol} מ"ק\n`;
+                msg += `\n`;
+            }
+        }
+
+        if(document.getElementById('hadDailyLabor').value === 'כן') {
+            const desc = document.getElementById('dailyLaborDesc').value.trim();
+            const count = document.getElementById('dailyLaborCount').value.trim();
+            const contractor = document.getElementById('dailyLaborContractor').value.trim();
+            const isCharge = document.getElementById('isContractorCharge').value;
+            const chargeName = document.getElementById('chargeContractorName').value.trim();
+
+            if(desc) {
+                msg += `🔨 *פועלי יומית (${count} פועלים של קבלן ${contractor}):* ${desc}`;
+                if(isCharge === 'כן' && chargeName) msg += ` (חיוב ${chargeName})`;
+                msg += `\n`;
+            }
+        }
+
+        if(document.getElementById('hadEquipment').value === 'כן') {
+            const equip = document.getElementById('equipType').value.trim();
+            const equipHours = document.getElementById('equipHours').value.trim();
+            const equipNotes = document.getElementById('equipNotes').value.trim();
+            if(equip) {
+                msg += `🚜 *ציוד/כלי עפר:* ${equip}${equipHours ? ' (' + equipHours + ')' : ''}`;
+                if(equipNotes) msg += ` - ${equipNotes}`;
+                msg += `\n`;
+            }
+        }
+        msg += `\n`;
+
+        if(lot === 'מגרש 12') {
+            const parking = document.getElementById('parkingWorks').value.trim();
+            if(parking) {
+                msg += `🚗 *חניונים ומחסנים*\n${parking}\n\n`;
+            }
+        }
+
+        msg += `👷 *כוח אדם*\n`;
+        msg += `▪️ פועלי שלד – ${document.getElementById('skeletonCount').value}\n`;
+        msg += `▪️ צוות בלוקים – ${document.getElementById('blockCount').value}\n`;
+        msg += `▪️ פועלי גמר- ${document.getElementById('finishCount').value}`;
+
+        document.getElementById('outputMsg').value = msg;
+        document.getElementById('outputCard').classList.remove('hidden');
+        document.getElementById('outputCard').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyText() {
+        const txt = document.getElementById('outputMsg');
+        txt.select();
+        document.execCommand('copy');
+        alert('ההודעה הועתקה בהצלחה! תוכל להדביק אותה בוואטסאפ.');
+    }
+
+    function sendToSystem() {
+        const lot = document.getElementById('lot').value;
+        
+        let skeletonDescText = "";
+        let finishingDescText = "";
+        let blocksDescText = "";
+
+        if (lot === 'מגרש 12') {
+            const b121 = document.getElementById('b121Works').value;
+            const b122 = document.getElementById('b122Works').value;
+            const b123 = document.getElementById('b123Works').value;
+            const b124 = document.getElementById('b124Works').value;
+            
+            skeletonDescText = `בניינים 121-124: ${b121} | ${b122} | ${b123} | ${b124}`;
+            finishingDescText = `עבודות גמר ופנים בחניונים ובבניינים`;
+            blocksDescText = `בנאות בלוקים (בניינים 122, 124)`;
+        } else {
+            skeletonDescText = document.getElementById('genSkeletonWorks').value || "עבודות שלד כלליות";
+            finishingDescText = document.getElementById('genFinishingWorks').value || "עבודות גמר כלליות";
+            blocksDescText = document.getElementById('genSubcontractors').value || "קבלני משנה";
+        }
+
+        const formData = {
+            lot: lot,
+            reportDate: document.getElementById('reportDate').value,
+            reporterName: document.getElementById('reporterName').value,
+            skeletonCount: document.getElementById('skeletonCount').value,
+            blockCount: document.getElementById('blockCount').value,
+            finishCount: document.getElementById('finishCount').value,
+            skeletonDesc: skeletonDescText,
+            finishingDesc: finishingDescText,
+            blocksDesc: blocksDescText,
+            pours: [],
+            dailyLabor: {
+                hasLabor: document.getElementById('hadDailyLabor').value === 'כן',
+                count: document.getElementById('dailyLaborCount').value,
+                contractor: document.getElementById('dailyLaborContractor').value,
+                desc: document.getElementById('dailyLaborDesc').value,
+                hours: document.getElementById('dailyLaborHours').value,
+                isCharge: document.getElementById('isContractorCharge').value,
+                chargeName: document.getElementById('chargeContractorName').value
+            },
+            equipment: {
+                hasEquip: document.getElementById('hadEquipment').value === 'כן',
+                type: document.getElementById('equipType').value,
+                hours: document.getElementById('equipHours').value,
+                notes: document.getElementById('equipNotes').value
+            }
+        };
+
+        document.querySelectorAll('.pour-item').forEach(item => {
+            formData.pours.push({
+                building: item.querySelector('.pourBuilding').value,
+                floor: item.querySelector('.pourFloor').value,
+                element: item.querySelector('.pourElement').value,
+                type: item.querySelector('.pourConcreteType').value,
+                volume: item.querySelector('.pourVolume').value,
+                method: item.querySelector('.pourMethod').value,
+                docNum: item.querySelector('.pourDocNum').value,
+                notes: item.querySelector('.pourNotes').value
+            });
+        });
+
+        const webAppUrl = "https://script.google.com/macros/s/AKfycbwwqDxRroJ_bVRTv7ysWWfNuisObDJLUmSe7RpfB89pqVdXJK_YFNtzjb0XLAoRSMmR/exec";
+
+        fetch(webAppUrl, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData)
+        })
+        .then(() => {
+            alert('הסטטוס והנתונים נשלחו בהצלחה וסודרו בלשוניות האקסל!');
+        })
+        .catch(error => {
+            alert('שגיאה בשליחת הנתונים: ' + error);
+        });
+    }
+</script>
+
+</body>
+</html>
