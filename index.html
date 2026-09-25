@@ -107,7 +107,7 @@
             </div>
         </div>
         <label>שם מדווח / מנהל עבודה</label>
-        <input type="text" id="reporterName" placeholder="שם מנהל העבודה" value="יונתן ליברמן">
+        <input type="text" id="reporterName" placeholder="שם מנהל העבודה" value="">
     </div>
 
     <!-- חלק 2: מנופאים וצוות ניהול -->
@@ -118,42 +118,42 @@
         <div class="grid-2">
             <div>
                 <label>מנוף 1 - שם מנופאי</label>
-                <input type="text" id="crane1Name" value="איהד עגלוני">
+                <input type="text" id="crane1Name" placeholder="שם מנופאי 1">
             </div>
             <div>
                 <label>מנוף 1 - שעות עבודה</label>
-                <input type="text" id="crane1Hours" placeholder="06:30 - 18:30" value="06:30 - 18:30">
+                <input type="text" id="crane1Hours" placeholder="למשל: 06:30 - 18:30">
             </div>
         </div>
 
         <div class="grid-2">
             <div>
                 <label>מנוף 2 - שם מנופאי</label>
-                <input type="text" id="crane2Name" value="אלסעדה">
+                <input type="text" id="crane2Name" placeholder="שם מנופאי 2">
             </div>
             <div>
                 <label>מנוף 2 - שעות עבודה</label>
-                <input type="text" id="crane2Hours" placeholder="06:30 - 18:30" value="06:30 - 18:30">
+                <input type="text" id="crane2Hours" placeholder="למשל: 06:30 - 18:30">
             </div>
         </div>
 
         <h3>👨‍💼 צוות האתר / ניהול</h3>
         <label>שמות צוות הניהול</label>
-        <input type="text" id="team" placeholder="למשל: יוסף – מנהל פרויקט, עידן, לוין" value="יוסף – מנהל פרויקט, עידן, לוין">
+        <input type="text" id="team" placeholder="למשל: יוסף – מנהל פרויקט, עידן, לוין">
 
         <h3>👷 כוח אדם מקצועי באתר</h3>
         <div class="grid-3">
             <div>
                 <label>📐 פועלי שלד</label>
-                <input type="number" id="skeletonCount" value="28">
+                <input type="number" id="skeletonCount" placeholder="0">
             </div>
             <div>
                 <label>🧱 פועלי בלוקים</label>
-                <input type="number" id="blockCount" value="3">
+                <input type="number" id="blockCount" placeholder="0">
             </div>
             <div>
                 <label>🎨 פועלי גמרים</label>
-                <input type="number" id="finishCount" value="8">
+                <input type="number" id="finishCount" placeholder="0">
             </div>
         </div>
     </div>
@@ -222,13 +222,13 @@
         <!-- תתי פרקים כלליים למגרש 8 / 13 -->
         <div id="generalLotSection" class="hidden">
             <label>📐 עבודות שלד (סטטוס ופירוט)</label>
-            <textarea id="genSkeletonWorks" rows="3" placeholder="ניקיון והוצאת חומר מקומה 8..."></textarea>
+            <textarea id="genSkeletonWorks" rows="3" placeholder="פירוט עבודות שלד..."></textarea>
 
             <label>🎨 עבודות גמרים</label>
-            <textarea id="genFinishingWorks" rows="3" placeholder="טיח גבס, ריצוף..."></textarea>
+            <textarea id="genFinishingWorks" rows="3" placeholder="פירוט עבודות גמרים..."></textarea>
 
             <label>👷🏼‍♂️ קבלני משנה (חשמל, אינסטלציה, גבס)</label>
-            <textarea id="genSubcontractors" rows="3" placeholder="חשמל, אינסטלציה..."></textarea>
+            <textarea id="genSubcontractors" rows="3" placeholder="פירוט קבלני משנה..."></textarea>
         </div>
     </div>
 
@@ -238,42 +238,42 @@
 
         <label>האם היו פועלים ביומית היום?</label>
         <select id="hadDailyLabor" onchange="toggleSection('dailyLaborFields', this.value)">
-            <option value="לא">לא</option>
-            <option value="כן" selected>כן</option>
+            <option value="לא" selected>לא</option>
+            <option value="כן">כן</option>
         </select>
 
-        <div id="dailyLaborFields">
+        <div id="dailyLaborFields" class="hidden">
             <div class="grid-2">
                 <div>
                     <label>כמות פועלים</label>
-                    <input type="number" id="dailyLaborCount" value="1">
+                    <input type="number" id="dailyLaborCount" placeholder="0">
                 </div>
                 <div>
                     <label>קבלן פועלים</label>
-                    <input type="text" id="dailyLaborContractor" value="שלד">
+                    <input type="text" id="dailyLaborContractor" placeholder="שם הקבלן">
                 </div>
             </div>
 
             <label>תיאור העבודה</label>
-            <input type="text" id="dailyLaborDesc" value="סיתות פירי אינסטלציה בניין 124 קומות 1-4">
+            <input type="text" id="dailyLaborDesc" placeholder="תיאור העבודה שבוצעה">
 
             <div class="grid-2">
                 <div>
                     <label>שעות עבודה</label>
-                    <input type="text" id="dailyLaborHours" value="07:30 - 19:00">
+                    <input type="text" id="dailyLaborHours" placeholder="למשל: 07:30 - 19:00">
                 </div>
                 <div>
                     <label>האם לחיוב קבלן?</label>
                     <select id="isContractorCharge" onchange="toggleSection('chargeNameDiv', this.value)">
-                        <option value="לא">לא</option>
-                        <option value="כן" selected>כן</option>
+                        <option value="לא" selected>לא</option>
+                        <option value="כן">כן</option>
                     </select>
                 </div>
             </div>
 
-            <div id="chargeNameDiv">
+            <div id="chargeNameDiv" class="hidden">
                 <label>שם קבלן לחיוב</label>
-                <input type="text" id="chargeContractorName" value="קבלן שלד">
+                <input type="text" id="chargeContractorName" placeholder="שם הקבלן לחיוב">
             </div>
         </div>
     </div>
@@ -284,23 +284,23 @@
 
         <label>האם פעל ציוד/כלי עפר היום?</label>
         <select id="hadEquipment" onchange="toggleSection('equipmentFields', this.value)">
-            <option value="לא">לא</option>
-            <option value="כן" selected>כן</option>
+            <option value="לא" selected>לא</option>
+            <option value="כן">כן</option>
         </select>
 
-        <div id="equipmentFields">
+        <div id="equipmentFields" class="hidden">
             <div class="grid-2">
                 <div>
                     <label>סוג הכלי / ציוד</label>
-                    <input type="text" id="equipType" value="משאבה 75 מ׳">
+                    <input type="text" id="equipType" placeholder="למשל: מחפרון / באגר">
                 </div>
                 <div>
                     <label>שעות עבודה</label>
-                    <input type="text" id="equipHours" value="8 שעות">
+                    <input type="text" id="equipHours" placeholder="למשל: 8 שעות">
                 </div>
             </div>
             <label>הערות / פירוט עבודה</label>
-            <input type="text" id="equipNotes" value="יציקות בבניינים 121, 123, 124">
+            <input type="text" id="equipNotes" placeholder="הערות נוספות">
         </div>
     </div>
 
@@ -310,11 +310,11 @@
 
         <label>האם בוצעה יציקת בטון היום?</label>
         <select id="hadPour" onchange="toggleSection('pourSectionFields', this.value)">
-            <option value="לא">לא</option>
-            <option value="כן" selected>כן</option>
+            <option value="לא" selected>לא</option>
+            <option value="כן">כן</option>
         </select>
 
-        <div id="pourSectionFields">
+        <div id="pourSectionFields" class="hidden">
             <div id="poursContainer"></div>
             <button type="button" class="add-btn" onclick="addPourItem()">➕ הוסף יציקה נוספת</button>
         </div>
@@ -338,11 +338,7 @@
 
     document.getElementById('reportDate').valueAsDate = new Date();
 
-    window.onload = function() {
-        addPourItem("121", "קומה 8", "תקרה", "ב-30", "95", "מערבל בטון 🚛");
-    };
-
-    function addPourItem(bld = '', floor = '', elem = '', type = 'ב-30', vol = '', method = 'מערבל בטון 🚛') {
+    function addPourItem(bld = '', floor = '', elem = '', type = 'ב-30', vol = '', method = '') {
         pourCount++;
         const container = document.getElementById('poursContainer');
         const div = document.createElement('div');
@@ -357,15 +353,15 @@
             <div class="grid-3">
                 <div>
                     <label>בניין</label>
-                    <input type="text" class="pourBuilding" value="${bld}">
+                    <input type="text" class="pourBuilding" value="${bld}" placeholder="מס' בניין">
                 </div>
                 <div>
                     <label>קומה</label>
-                    <input type="text" class="pourFloor" value="${floor}">
+                    <input type="text" class="pourFloor" value="${floor}" placeholder="קומה">
                 </div>
                 <div>
                     <label>אלמנט</label>
-                    <input type="text" class="pourElement" value="${elem}">
+                    <input type="text" class="pourElement" value="${elem}" placeholder="אלמנט">
                 </div>
             </div>
             <div class="grid-2">
@@ -381,14 +377,14 @@
                     </select>
                 </div>
                 <div>
-                    <label>כמות במשאבה (מ"ק)</label>
-                    <input type="number" class="pourVolume" value="${vol}">
+                    <label>כמות בטון (קוב)</label>
+                    <input type="number" class="pourVolume" value="${vol}" placeholder="0">
                 </div>
             </div>
             <div class="grid-2">
                 <div>
                     <label>אמצעי יציקה</label>
-                    <input type="text" class="pourMethod" value="${method}">
+                    <input type="text" class="pourMethod" value="${method}" placeholder="משאבה / מערבל">
                 </div>
                 <div>
                     <label>מספר תעודת בטון</label>
@@ -421,6 +417,9 @@
         const el = document.getElementById(id);
         if(val === 'כן') {
             el.classList.remove('hidden');
+            if(id === 'pourSectionFields' && document.querySelectorAll('.pour-item').length === 0) {
+                addPourItem();
+            }
         } else {
             el.classList.add('hidden');
         }
@@ -515,14 +514,14 @@
                     if(bld) details.push(`בניין ${bld}`);
                     if(floor) details.push(floor);
                     if(elem) details.push(elem);
-                    if(vol) details.push(`${vol} מ"ק`);
+                    if(vol) details.push(`${vol} קוב`);
                     if(type) details.push(`בטון ${type}`);
 
                     msg += details.join(' | ');
                     if(notes) msg += ` (${notes})`;
                     msg += `\n`;
                 });
-                if(totalVol > 0) msg += `📊 *סה"כ בטון שנצק:* ${totalVol} מ"ק\n`;
+                if(totalVol > 0) msg += `📊 *סה"כ בטון שנצק:* ${totalVol} קוב\n`;
                 msg += `\n`;
             }
         }
@@ -535,7 +534,7 @@
             const chargeName = document.getElementById('chargeContractorName').value.trim();
 
             if(desc) {
-                msg += `🔨 *פועלי יומית (${count} פועלים של קבלן ${contractor}):* ${desc}`;
+                msg += `🔨 *פועלי יומית (${count || 0} פועלים של קבלן ${contractor || ''}):* ${desc}`;
                 if(isCharge === 'כן' && chargeName) msg += ` (חיוב ${chargeName})`;
                 msg += `\n`;
             }
@@ -561,9 +560,9 @@
         }
 
         msg += `👷 *כוח אדם*\n`;
-        msg += `▪️ פועלי שלד – ${document.getElementById('skeletonCount').value}\n`;
-        msg += `▪️ צוות בלוקים – ${document.getElementById('blockCount').value}\n`;
-        msg += `▪️ פועלי גמר- ${document.getElementById('finishCount').value}`;
+        msg += `▪️ פועלי שלד – ${document.getElementById('skeletonCount').value || 0}\n`;
+        msg += `▪️ צוות בלוקים – ${document.getElementById('blockCount').value || 0}\n`;
+        msg += `▪️ פועלי גמר- ${document.getElementById('finishCount').value || 0}`;
 
         document.getElementById('outputMsg').value = msg;
         document.getElementById('outputCard').classList.remove('hidden');
@@ -580,60 +579,17 @@
     function sendToSystem() {
         const lot = document.getElementById('lot').value;
         
-        let skeletonDescText = "";
-        let finishingDescText = "";
-        let blocksDescText = "";
-
-        if (lot === 'מגרש 12') {
-            let skelArr = [];
-            let blockArr = [];
-            let finishArr = [];
-
-            ["121", "122", "123", "124"].forEach(bld => {
-                const s = document.getElementById('b' + bld + '_skeleton').value.trim();
-                const b = document.getElementById('b' + bld + '_blocks').value.trim();
-                const f = document.getElementById('b' + bld + '_finishing').value.trim();
-                const p = document.getElementById('b' + bld + '_plumbing').value.trim();
-                const e = document.getElementById('b' + bld + '_electrical').value.trim();
-
-                if (s) skelArr.push(`בניין ${bld}: ${s}`);
-                if (b) blockArr.push(`בניין ${bld}: ${b}`);
-                
-                let finParts = [];
-                if (f) finParts.push(f);
-                if (p) finParts.push(`אינסטלציה: ${p}`);
-                if (e) finParts.push(`חשמל: ${e}`);
-                if (finParts.length > 0) {
-                    finishArr.push(`בניין ${bld}: ${finParts.join(' | ')}`);
-                }
-            });
-
-            const parking = document.getElementById('parkingWorks').value.trim();
-            if (parking) finishArr.push(`חניונים ומחסנים: ${parking}`);
-
-            skeletonDescText = skelArr.join(" | ");
-            blocksDescText = blockArr.join(" | ");
-            finishingDescText = finishArr.join(" | ");
-        } else {
-            skeletonDescText = document.getElementById('genSkeletonWorks').value || "עבודות שלד כלליות";
-            finishingDescText = document.getElementById('genFinishingWorks').value || "עבודות גמר כלליות";
-            blocksDescText = document.getElementById('genSubcontractors').value || "קבלני משנה";
-        }
-
         const formData = {
             lot: lot,
             reportDate: document.getElementById('reportDate').value,
             reporterName: document.getElementById('reporterName').value,
-            skeletonCount: document.getElementById('skeletonCount').value,
-            blockCount: document.getElementById('blockCount').value,
-            finishCount: document.getElementById('finishCount').value,
-            skeletonDesc: skeletonDescText,
-            finishingDesc: finishingDescText,
-            blocksDesc: blocksDescText,
+            skeletonCount: document.getElementById('skeletonCount').value || "0",
+            blockCount: document.getElementById('blockCount').value || "0",
+            finishCount: document.getElementById('finishCount').value || "0",
             pours: [],
             dailyLabor: {
                 hasLabor: document.getElementById('hadDailyLabor').value === 'כן',
-                count: document.getElementById('dailyLaborCount').value,
+                count: document.getElementById('dailyLaborCount').value || "0",
                 contractor: document.getElementById('dailyLaborContractor').value,
                 desc: document.getElementById('dailyLaborDesc').value,
                 hours: document.getElementById('dailyLaborHours').value,
@@ -645,8 +601,23 @@
                 type: document.getElementById('equipType').value,
                 hours: document.getElementById('equipHours').value,
                 notes: document.getElementById('equipNotes').value
-            }
+            },
+            parkingWorks: document.getElementById('parkingWorks') ? document.getElementById('parkingWorks').value : ""
         };
+
+        if (lot === 'מגרש 12') {
+            ["121", "122", "123", "124"].forEach(bld => {
+                formData['b' + bld + '_skeleton'] = document.getElementById('b' + bld + '_skeleton').value;
+                formData['b' + bld + '_blocks'] = document.getElementById('b' + bld + '_blocks').value;
+                formData['b' + bld + '_finishing'] = document.getElementById('b' + bld + '_finishing').value;
+                formData['b' + bld + '_plumbing'] = document.getElementById('b' + bld + '_plumbing').value;
+                formData['b' + bld + '_electrical'] = document.getElementById('b' + bld + '_electrical').value;
+            });
+        } else {
+            formData.skeletonDesc = document.getElementById('genSkeletonWorks').value;
+            formData.finishingDesc = document.getElementById('genFinishingWorks').value;
+            formData.blocksDesc = document.getElementById('genSubcontractors').value;
+        }
 
         document.querySelectorAll('.pour-item').forEach(item => {
             formData.pours.push({
