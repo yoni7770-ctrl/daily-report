@@ -1,653 +1,177 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏗️ טופס דיווח יומי - אתר בנייה</title>
-    <style>
-        :root {
-            --primary: #1F4E78;
-            --bg: #F4F6F9;
-            --card-bg: #FFFFFF;
-            --accent: #27AE60;
-            --system-btn: #8E44AD;
-            --danger: #E74C3C;
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    
+    if (!data.reportDate) {
+      return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Missing reportDate"}))
+                  .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    var reportDate = new Date(data.reportDate);
+    var monthStr = (reportDate.getMonth() + 1) + "/" + reportDate.getFullYear();
+    
+    function insertChronologically(sheet, dateColIndex, rowData, startRow) {
+      startRow = startRow || 4;
+      var lastRow = sheet.getLastRow();
+      
+      if (lastRow < startRow) {
+        sheet.getRange(startRow, 1, 1, rowData.length).setValues([rowData]);
+        return;
+      }
+      
+      var dates = sheet.getRange(startRow, dateColIndex, lastRow - startRow + 1, 1).getValues();
+      var inserted = false;
+      
+      for (var i = 0; i < dates.length; i++) {
+        if (!dates[i][0]) continue;
+        var currentDate = new Date(dates[i][0]);
+        if (!isNaN(currentDate.getTime()) && reportDate < currentDate) {
+          sheet.insertRowBefore(startRow + i);
+          sheet.getRange(startRow + i, 1, 1, rowData.length).setValues([rowData]);
+          inserted = true;
+          break;
         }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            padding: 15px;
-            color: #333;
-        }
-        .container {
-            max-width: 650px;
-            margin: 0 auto;
-        }
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 18px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-        h1 { text-align: center; color: var(--primary); font-size: 1.4rem; margin-top: 0; }
-        h2 { color: var(--primary); font-size: 1.1rem; border-bottom: 2px solid var(--bg); padding-bottom: 5px; margin-top: 0; }
-        h3 { color: var(--primary); font-size: 0.95rem; margin-top: 15px; margin-bottom: 5px; background: #EBF5FB; padding: 6px 10px; border-radius: 6px; }
-        .sub-desc { font-size: 0.85rem; color: #666; margin-bottom: 12px; }
-        label { font-weight: bold; font-size: 0.9rem; display: block; margin-top: 10px; margin-bottom: 4px; }
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #CCC;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 0.95rem;
-        }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-        .hidden { display: none; }
-        button {
-            width: 100%;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        button.copy-btn { background-color: var(--accent); margin-top: 8px; }
-        button.system-btn { background-color: var(--system-btn); margin-top: 8px; }
-        button.add-btn { background-color: #2980B9; font-size: 0.95rem; padding: 10px; margin-top: 10px; }
-        button.remove-btn { background-color: var(--danger); font-size: 0.85rem; padding: 6px 10px; width: auto; margin-top: 5px; }
-        textarea.out-box { background: #EBF5FB; font-family: monospace; direction: rtl; }
-        
-        .pour-item {
-            background: #FAFAFA;
-            border: 1px solid #E0E0E0;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 12px;
-        }
-        .pour-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 8px;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h1>🏗️ טופס דיווח יומי - אתר בנייה</h1>
-
-    <!-- חלק 1: פרטי הדיווח הכלליים -->
-    <div class="card">
-        <h2>חלק 1: פרטי הדיווח הכלליים</h2>
-        <div class="sub-desc">נתונים אלו יופיעו בכותרת הדיווח וישמשו לשיוך הנתונים באקסלים.</div>
-        
-        <div class="grid-2">
-            <div>
-                <label>מגרש / אתר</label>
-                <select id="lot" onchange="toggleLotView()">
-                    <option value="מגרש 12" selected>מגרש 12</option>
-                    <option value="מגרש 8">מגרש 8</option>
-                    <option value="מגרש 13">מגרש 13</option>
-                </select>
-            </div>
-            <div>
-                <label>תאריך דיווח</label>
-                <input type="date" id="reportDate">
-            </div>
-        </div>
-        <label>שם מדווח / מנהל עבודה</label>
-        <input type="text" id="reporterName" placeholder="שם מנהל העבודה" value="">
-    </div>
-
-    <!-- חלק 2: מנופאים וצוות ניהול -->
-    <div class="card">
-        <h2>חלק 2: מנופאים וצוות ניהול (נפרד מכוח אדם)</h2>
-        
-        <h3>👷 מנופאים</h3>
-        <div class="grid-2">
-            <div>
-                <label>מנוף 1 - שם מנופאי</label>
-                <input type="text" id="crane1Name" placeholder="שם מנופאי 1">
-            </div>
-            <div>
-                <label>מנוף 1 - שעות עבודה</label>
-                <input type="text" id="crane1Hours" placeholder="למשל: 06:30 - 18:30">
-            </div>
-        </div>
-
-        <div class="grid-2">
-            <div>
-                <label>מנוף 2 - שם מנופאי</label>
-                <input type="text" id="crane2Name" placeholder="שם מנופאי 2">
-            </div>
-            <div>
-                <label>מנוף 2 - שעות עבודה</label>
-                <input type="text" id="crane2Hours" placeholder="למשל: 06:30 - 18:30">
-            </div>
-        </div>
-
-        <h3>👨‍💼 צוות האתר / ניהול</h3>
-        <label>שמות צוות הניהול</label>
-        <input type="text" id="team" placeholder="למשל: יוסף – מנהל פרויקט, עידן, לוין">
-
-        <h3>👷 כוח אדם מקצועי באתר</h3>
-        <div class="grid-3">
-            <div>
-                <label>📐 פועלי שלד</label>
-                <input type="number" id="skeletonCount" placeholder="0">
-            </div>
-            <div>
-                <label>🧱 פועלי בלוקים</label>
-                <input type="number" id="blockCount" placeholder="0">
-            </div>
-            <div>
-                <label>🎨 פועלי גמרים</label>
-                <input type="number" id="finishCount" placeholder="0">
-            </div>
-        </div>
-    </div>
-
-    <!-- חלק 3: פירוט עבודות לפי מקצועות לכל בניין בנפרד -->
-    <div class="card">
-        <h2>חלק 3: פירוט עבודות וקדמה (לפי בניינים ומקצועות)</h2>
-
-        <div id="lot12Section">
-            <!-- בניין 121 -->
-            <h3>🏢 בניין 121</h3>
-            <label>📐 שלד</label>
-            <textarea id="b121_skeleton" rows="2" placeholder="עבודות שלד בניין 121"></textarea>
-            <label>🧱 בלוקים</label>
-            <textarea id="b121_blocks" rows="2" placeholder="עבודות בלוקים בניין 121"></textarea>
-            <label>🎨 גמר</label>
-            <textarea id="b121_finishing" rows="2" placeholder="עבודות גמר בניין 121"></textarea>
-            <label>🚰 אינסטלציה</label>
-            <textarea id="b121_plumbing" rows="2" placeholder="עבודות אינסטלציה בניין 121"></textarea>
-            <label>⚡ חשמל</label>
-            <textarea id="b121_electrical" rows="2" placeholder="עבודות חשמל בניין 121"></textarea>
-
-            <!-- בניין 122 -->
-            <h3>🏢 בניין 122</h3>
-            <label>📐 שלד</label>
-            <textarea id="b122_skeleton" rows="2" placeholder="עבודות שלד בניין 122"></textarea>
-            <label>🧱 בלוקים</label>
-            <textarea id="b122_blocks" rows="2" placeholder="עבודות בלוקים בניין 122"></textarea>
-            <label>🎨 גמר</label>
-            <textarea id="b122_finishing" rows="2" placeholder="עבודות גמר בניין 122"></textarea>
-            <label>🚰 אינסטלציה</label>
-            <textarea id="b122_plumbing" rows="2" placeholder="עבודות אינסטלציה בניין 122"></textarea>
-            <label>⚡ חשמל</label>
-            <textarea id="b122_electrical" rows="2" placeholder="עבודות חשמל בניין 122"></textarea>
-
-            <!-- בניין 123 -->
-            <h3>🏢 בניין 123</h3>
-            <label>📐 שלד</label>
-            <textarea id="b123_skeleton" rows="2" placeholder="עבודות שלד בניין 123"></textarea>
-            <label>🧱 בלוקים</label>
-            <textarea id="b123_blocks" rows="2" placeholder="עבודות בלוקים בניין 123"></textarea>
-            <label>🎨 גמר</label>
-            <textarea id="b123_finishing" rows="2" placeholder="עבודות גמר בניין 123"></textarea>
-            <label>🚰 אינסטלציה</label>
-            <textarea id="b123_plumbing" rows="2" placeholder="עבודות אינסטלציה בניין 123"></textarea>
-            <label>⚡ חשמל</label>
-            <textarea id="b123_electrical" rows="2" placeholder="עבודות חשמל בניין 123"></textarea>
-
-            <!-- בניין 124 -->
-            <h3>🏢 בניין 124</h3>
-            <label>📐 שלד</label>
-            <textarea id="b124_skeleton" rows="2" placeholder="עבודות שלד בניין 124"></textarea>
-            <label>🧱 בלוקים</label>
-            <textarea id="b124_blocks" rows="2" placeholder="עבודות בלוקים בניין 124"></textarea>
-            <label>🎨 גמר</label>
-            <textarea id="b124_finishing" rows="2" placeholder="עבודות גמר בניין 124"></textarea>
-            <label>🚰 אינסטלציה</label>
-            <textarea id="b124_plumbing" rows="2" placeholder="עבודות אינסטלציה בניין 124"></textarea>
-            <label>⚡ חשמל</label>
-            <textarea id="b124_electrical" rows="2" placeholder="עבודות חשמל בניין 124"></textarea>
-
-            <h3>🚗 חניונים ומחסנים</h3>
-            <textarea id="parkingWorks" rows="2" placeholder="פירוט עבודות בחניונים ובמחסנים"></textarea>
-        </div>
-
-        <!-- תתי פרקים כלליים למגרש 8 / 13 -->
-        <div id="generalLotSection" class="hidden">
-            <label>📐 עבודות שלד (סטטוס ופירוט)</label>
-            <textarea id="genSkeletonWorks" rows="3" placeholder="פירוט עבודות שלד..."></textarea>
-
-            <label>🎨 עבודות גמרים</label>
-            <textarea id="genFinishingWorks" rows="3" placeholder="פירוט עבודות גמרים..."></textarea>
-
-            <label>👷🏼‍♂️ קבלני משנה (חשמל, אינסטלציה, גבס)</label>
-            <textarea id="genSubcontractors" rows="3" placeholder="פירוט קבלני משנה..."></textarea>
-        </div>
-    </div>
-
-    <!-- חלק 4: פועלים ביומית -->
-    <div class="card">
-        <h2>חלק 4: פועלים ביומית (מזין ישירות ל-מעקב יומיות.xlsx)</h2>
-
-        <label>האם היו פועלים ביומית היום?</label>
-        <select id="hadDailyLabor" onchange="toggleSection('dailyLaborFields', this.value)">
-            <option value="לא" selected>לא</option>
-            <option value="כן">כן</option>
-        </select>
-
-        <div id="dailyLaborFields" class="hidden">
-            <div class="grid-2">
-                <div>
-                    <label>כמות פועלים</label>
-                    <input type="number" id="dailyLaborCount" placeholder="0">
-                </div>
-                <div>
-                    <label>קבלן פועלים</label>
-                    <input type="text" id="dailyLaborContractor" placeholder="שם הקבלן">
-                </div>
-            </div>
-
-            <label>תיאור העבודה</label>
-            <input type="text" id="dailyLaborDesc" placeholder="תיאור העבודה שבוצעה">
-
-            <div class="grid-2">
-                <div>
-                    <label>שעות עבודה</label>
-                    <input type="text" id="dailyLaborHours" placeholder="למשל: 07:30 - 19:00">
-                </div>
-                <div>
-                    <label>האם לחיוב קבלן?</label>
-                    <select id="isContractorCharge" onchange="toggleSection('chargeNameDiv', this.value)">
-                        <option value="לא" selected>לא</option>
-                        <option value="כן">כן</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="chargeNameDiv" class="hidden">
-                <label>שם קבלן לחיוב</label>
-                <input type="text" id="chargeContractorName" placeholder="שם הקבלן לחיוב">
-            </div>
-        </div>
-    </div>
-
-    <!-- חלק 5: כלי עפר וציוד -->
-    <div class="card">
-        <h2>חלק 5: כלי עפר וציוד (מזין ישירות ל-מעקב כלי עפר.xlsx)</h2>
-
-        <label>האם פעל ציוד/כלי עפר היום?</label>
-        <select id="hadEquipment" onchange="toggleSection('equipmentFields', this.value)">
-            <option value="לא" selected>לא</option>
-            <option value="כן">כן</option>
-        </select>
-
-        <div id="equipmentFields" class="hidden">
-            <div class="grid-2">
-                <div>
-                    <label>סוג הכלי / ציוד</label>
-                    <input type="text" id="equipType" placeholder="למשל: מחפרון / באגר">
-                </div>
-                <div>
-                    <label>שעות עבודה</label>
-                    <input type="text" id="equipHours" placeholder="למשל: 8 שעות">
-                </div>
-            </div>
-            <label>הערות / פירוט עבודה</label>
-            <input type="text" id="equipNotes" placeholder="הערות נוספות">
-        </div>
-    </div>
-
-    <!-- חלק 6: מעקב יציקות ובטון -->
-    <div class="card">
-        <h2>חלק 6: מעקב יציקות ובטון (מזין ישירות ל-ריכוז כמויות בטון.xlsx)</h2>
-
-        <label>האם בוצעה יציקת בטון היום?</label>
-        <select id="hadPour" onchange="toggleSection('pourSectionFields', this.value)">
-            <option value="לא" selected>לא</option>
-            <option value="כן">כן</option>
-        </select>
-
-        <div id="pourSectionFields" class="hidden">
-            <div id="poursContainer"></div>
-            <button type="button" class="add-btn" onclick="addPourItem()">➕ הוסף יציקה נוספת</button>
-        </div>
-    </div>
-
-    <!-- לחצן הפקת הודעה -->
-    <button onclick="generateWhatsApp()">📱 צור הודעת WhatsApp</button>
-
-    <!-- תוצר סופי -->
-    <div class="card hidden" id="outputCard">
-        <h2>📲 ההודעה המוכנה לשליחה</h2>
-        <textarea id="outputMsg" class="out-box" rows="18" readonly></textarea>
-        <button class="copy-btn" onclick="copyText()">📋 העתק הודעה</button>
-        <button class="system-btn" onclick="sendToSystem()">🚀 שלח סטטוס למערכת</button>
-    </div>
-
-</div>
-
-<script>
-    let pourCount = 0;
-
-    document.getElementById('reportDate').valueAsDate = new Date();
-
-    function addPourItem(bld = '', floor = '', elem = '', type = 'ב-30', vol = '', method = '') {
-        pourCount++;
-        const container = document.getElementById('poursContainer');
-        const div = document.createElement('div');
-        div.className = 'pour-item';
-        div.id = `pour_item_${pourCount}`;
-
-        div.innerHTML = `
-            <div class="pour-header">
-                <span>🚛 יציקה #${pourCount}</span>
-                ${pourCount > 1 ? `<button type="button" class="remove-btn" onclick="removePourItem(${pourCount})">🗑️ הסר</button>` : ''}
-            </div>
-            <div class="grid-3">
-                <div>
-                    <label>בניין</label>
-                    <input type="text" class="pourBuilding" value="${bld}" placeholder="מס' בניין">
-                </div>
-                <div>
-                    <label>קומה</label>
-                    <input type="text" class="pourFloor" value="${floor}" placeholder="קומה">
-                </div>
-                <div>
-                    <label>אלמנט</label>
-                    <input type="text" class="pourElement" value="${elem}" placeholder="אלמנט">
-                </div>
-            </div>
-            <div class="grid-2">
-                <div>
-                    <label>סוג בטון</label>
-                    <select class="pourConcreteType">
-                        <option value="ב-30" ${type === 'ב-30' ? 'selected' : ''}>ב-30</option>
-                        <option value="ב-40" ${type === 'ב-40' ? 'selected' : ''}>ב-40</option>
-                        <option value="ב-20" ${type === 'ב-20' ? 'selected' : ''}>ב-20</option>
-                        <option value="ב-50" ${type === 'ב-50' ? 'selected' : ''}>ב-50</option>
-                        <option value="ב-60" ${type === 'ב-60' ? 'selected' : ''}>ב-60</option>
-                        <option value="CLSM" ${type === 'CLSM' ? 'selected' : ''}>CLSM</option>
-                    </select>
-                </div>
-                <div>
-                    <label>כמות בטון (קוב)</label>
-                    <input type="number" class="pourVolume" value="${vol}" placeholder="0">
-                </div>
-            </div>
-            <div class="grid-2">
-                <div>
-                    <label>אמצעי יציקה</label>
-                    <input type="text" class="pourMethod" value="${method}" placeholder="משאבה / מערבל">
-                </div>
-                <div>
-                    <label>מספר תעודת בטון</label>
-                    <input type="text" class="pourDocNum" placeholder="מספר תעודה">
-                </div>
-            </div>
-            <label>הערות יציקה</label>
-            <input type="text" class="pourNotes" placeholder="הערות נוספות">
-        `;
-        container.appendChild(div);
+      }
+      if (!inserted) {
+        sheet.appendRow(rowData);
+      }
     }
 
-    function removePourItem(id) {
-        const item = document.getElementById(`pour_item_${id}`);
-        if(item) item.remove();
+    // 1. מעקב יציקות בטון
+    if (data.pours && data.pours.length > 0) {
+      var sheetPours = ss.getSheetByName("מעקב יציקות בטון");
+      if (sheetPours) {
+        data.pours.forEach(function(p) {
+          if (!p.volume) return;
+          var rowData = [
+            data.reportDate, data.lot, p.building, p.floor, "", p.element, 
+            "", "", p.type === "CLSM" ? p.volume : "", p.type === "ב-20" ? p.volume : "", 
+            p.type === "ב-30" ? p.volume : "", p.type === "ב-40" ? p.volume : "", 
+            p.type === "ב-50" ? p.volume : "", p.type === "ב-60" ? p.volume : "", 
+            p.method, p.volume, "", "", p.testTaken || "לא", "", "", "", "", p.notes
+          ];
+          insertChronologically(sheetPours, 1, rowData, 4);
+        });
+      }
     }
 
-    function toggleLotView() {
-        const lot = document.getElementById('lot').value;
-        if(lot === 'מגרש 12') {
-            document.getElementById('lot12Section').classList.remove('hidden');
-            document.getElementById('generalLotSection').classList.add('hidden');
-        } else {
-            document.getElementById('lot12Section').classList.add('hidden');
-            document.getElementById('generalLotSection').classList.remove('hidden');
-        }
+    // 2. מעקב פועלי יומית
+    if (data.dailyLabor && data.dailyLabor.hasLabor && data.dailyLabor.desc) {
+      var sheetDaily = ss.getSheetByName("מעקב פועלי יומית");
+      if (sheetDaily) {
+        var contractorNameValue = (data.dailyLabor.isCharge === "כן") ? data.dailyLabor.chargeName : "";
+        var rowDataDaily = [
+          data.lot, monthStr, data.reportDate, data.dailyLabor.count,      
+          data.dailyLabor.desc, data.dailyLabor.hours, data.dailyLabor.isCharge,   
+          contractorNameValue, data.dailyLabor.contractor  
+        ];
+        insertChronologically(sheetDaily, 3, rowDataDaily, 4);
+      }
     }
 
-    function toggleSection(id, val) {
-        const el = document.getElementById(id);
-        if(val === 'כן') {
-            el.classList.remove('hidden');
-            if(id === 'pourSectionFields' && document.querySelectorAll('.pour-item').length === 0) {
-                addPourItem();
-            }
-        } else {
-            el.classList.add('hidden');
-        }
-    }
+    // 3. מעקב פועלי שלד+גמר
+    var sheetSkeleton = ss.getSheetByName("מעקב פועלי שלד+גמר");
+    if (sheetSkeleton) {
+      var daysNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+      var dayName = daysNames[reportDate.getDay()];
+      
+      var skeletonDesc = "";
+      var finishingDesc = "";
+      var blocksDesc = "";
+      var generalColumnM = ""; // עמודה M עבור מלאכות נוספות / קבלני משנה במגרש 8
 
-    function generateWhatsApp() {
-        const lot = document.getElementById('lot').value;
-        const rawDate = new Date(document.getElementById('reportDate').value);
+      if (data.lot === "מגרש 12") {
+        var skelArr = [];
+        var blockArr = [];
+        var finishArr = [];
+
+        var buildings = ["121", "122", "123", "124"];
         
-        const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
-        const dayName = days[rawDate.getDay()];
-        const formattedDate = rawDate.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        buildings.forEach(function(bld) {
+          var s = data["b" + bld + "_skeleton"] || "";
+          var b = data["b" + bld + "_blocks"] || "";
+          var f = data["b" + bld + "_finishing"] || "";
 
-        const crane1Name = document.getElementById('crane1Name').value.trim();
-        const crane1Hours = document.getElementById('crane1Hours').value.trim();
-        const crane2Name = document.getElementById('crane2Name').value.trim();
-        const crane2Hours = document.getElementById('crane2Hours').value.trim();
-        
-        const team = document.getElementById('team').value.trim();
-        const reporter = document.getElementById('reporterName').value.trim();
-
-        let msg = `📋 *סטטוס ${lot}*\n`;
-        msg += `📅 *יום ${dayName} | ${formattedDate}*\n`;
-        if(reporter) msg += `👤 *מדווח:* ${reporter}\n`;
-        msg += `\n`;
-
-        if(crane1Name || crane2Name) {
-            msg += `👷 *מנופאים*\n`;
-            if(crane1Name) msg += `🔹 מנוף 1 – ${crane1Name}${crane1Hours ? ' (' + crane1Hours + ')' : ''}\n`;
-            if(crane2Name) msg += `🔹 מנוף 2 – ${crane2Name}${crane2Hours ? ' (' + crane2Hours + ')' : ''}\n`;
-            msg += `\n`;
-        }
-
-        if(team) {
-            msg += `👨‍💼 *צוות האתר*\n`;
-            team.split(',').forEach(t => msg += `🔹 ${t.trim()}\n`);
-            msg += `\n`;
-        }
-
-        msg += `🏗️ *עבודות שלד וגמרים*\n\n`;
-
-        if(lot === 'מגרש 12') {
-            const addBldFields = (bldName, prefix) => {
-                const skel = document.getElementById(prefix + '_skeleton').value.trim();
-                const blocks = document.getElementById(prefix + '_blocks').value.trim();
-                const finish = document.getElementById(prefix + '_finishing').value.trim();
-                const plumbing = document.getElementById(prefix + '_plumbing').value.trim();
-                const electrical = document.getElementById(prefix + '_electrical').value.trim();
-
-                if(skel || blocks || finish || plumbing || electrical) {
-                    msg += `🏢 *${bldName}*\n`;
-                    if(skel) msg += `▪️ שלד: ${skel}\n`;
-                    if(blocks) msg += `▪️ בלוקים: ${blocks}\n`;
-                    if(finish) msg += `▪️ גמר: ${finish}\n`;
-                    if(plumbing) msg += `▪️ אינסטלציה: ${plumbing}\n`;
-                    if(electrical) msg += `▪️ חשמל: ${electrical}\n`;
-                    msg += `\n`;
-                }
-            };
-
-            addBldFields('בניין 121', 'b121');
-            addBldFields('בניין 122', 'b122');
-            addBldFields('בניין 123', 'b123');
-            addBldFields('בניין 124', 'b124');
-        } else {
-            const skel = document.getElementById('genSkeletonWorks').value.trim();
-            const fin = document.getElementById('genFinishingWorks').value.trim();
-            const sub = document.getElementById('genSubcontractors').value.trim();
-
-            if(skel) msg += `📐 *עבודות שלד:*\n${skel}\n\n`;
-            if(fin) msg += `🎨 *עבודות גמרים:*\n${fin}\n\n`;
-            if(sub) msg += `👷🏼‍♂️ *קבלני משנה:*\n${sub}\n\n`;
-        }
-
-        if(document.getElementById('hadPour').value === 'כן') {
-            const pourItems = document.querySelectorAll('.pour-item');
-            if(pourItems.length > 0) {
-                msg += `🚛 *יציקות בטון שנערכו היום:*\n`;
-                let totalVol = 0;
-                pourItems.forEach((item, index) => {
-                    const bld = item.querySelector('.pourBuilding').value.trim();
-                    const floor = item.querySelector('.pourFloor').value.trim();
-                    const elem = item.querySelector('.pourElement').value.trim();
-                    const type = item.querySelector('.pourConcreteType').value;
-                    const vol = item.querySelector('.pourVolume').value.trim();
-                    const notes = item.querySelector('.pourNotes').value.trim();
-
-                    if(vol) totalVol += parseFloat(vol) || 0;
-
-                    msg += `▪️ *יציקה ${index + 1}:* `;
-                    let details = [];
-                    if(bld) details.push(`בניין ${bld}`);
-                    if(floor) details.push(floor);
-                    if(elem) details.push(elem);
-                    if(vol) details.push(`${vol} קוב`);
-                    if(type) details.push(`בטון ${type}`);
-
-                    msg += details.join(' | ');
-                    if(notes) msg += ` (${notes})`;
-                    msg += `\n`;
-                });
-                if(totalVol > 0) msg += `📊 *סה"כ בטון שנצק:* ${totalVol} קוב\n`;
-                msg += `\n`;
-            }
-        }
-
-        if(document.getElementById('hadDailyLabor').value === 'כן') {
-            const desc = document.getElementById('dailyLaborDesc').value.trim();
-            const count = document.getElementById('dailyLaborCount').value.trim();
-            const contractor = document.getElementById('dailyLaborContractor').value.trim();
-            const isCharge = document.getElementById('isContractorCharge').value;
-            const chargeName = document.getElementById('chargeContractorName').value.trim();
-
-            if(desc) {
-                msg += `🔨 *פועלי יומית (${count || 0} פועלים של קבלן ${contractor || ''}):* ${desc}`;
-                if(isCharge === 'כן' && chargeName) msg += ` (חיוב ${chargeName})`;
-                msg += `\n`;
-            }
-        }
-
-        if(document.getElementById('hadEquipment').value === 'כן') {
-            const equip = document.getElementById('equipType').value.trim();
-            const equipHours = document.getElementById('equipHours').value.trim();
-            const equipNotes = document.getElementById('equipNotes').value.trim();
-            if(equip) {
-                msg += `🚜 *ציוד/כלי עפר:* ${equip}${equipHours ? ' (' + equipHours + ')' : ''}`;
-                if(equipNotes) msg += ` - ${equipNotes}`;
-                msg += `\n`;
-            }
-        }
-        msg += `\n`;
-
-        if(lot === 'מגרש 12') {
-            const parking = document.getElementById('parkingWorks').value.trim();
-            if(parking) {
-                msg += `🚗 *חניונים ומחסנים*\n${parking}\n\n`;
-            }
-        }
-
-        msg += `👷 *כוח אדם*\n`;
-        msg += `▪️ פועלי שלד – ${document.getElementById('skeletonCount').value || 0}\n`;
-        msg += `▪️ צוות בלוקים – ${document.getElementById('blockCount').value || 0}\n`;
-        msg += `▪️ פועלי גמר- ${document.getElementById('finishCount').value || 0}`;
-
-        document.getElementById('outputMsg').value = msg;
-        document.getElementById('outputCard').classList.remove('hidden');
-        document.getElementById('outputCard').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function copyText() {
-        const txt = document.getElementById('outputMsg');
-        txt.select();
-        document.execCommand('copy');
-        alert('ההודעה הועתקה בהצלחה! תוכל להדביק אותה בוואטסאפ.');
-    }
-
-    function sendToSystem() {
-        const lot = document.getElementById('lot').value;
-        
-        const formData = {
-            lot: lot,
-            reportDate: document.getElementById('reportDate').value,
-            reporterName: document.getElementById('reporterName').value,
-            skeletonCount: document.getElementById('skeletonCount').value || "0",
-            blockCount: document.getElementById('blockCount').value || "0",
-            finishCount: document.getElementById('finishCount').value || "0",
-            pours: [],
-            dailyLabor: {
-                hasLabor: document.getElementById('hadDailyLabor').value === 'כן',
-                count: document.getElementById('dailyLaborCount').value || "0",
-                contractor: document.getElementById('dailyLaborContractor').value,
-                desc: document.getElementById('dailyLaborDesc').value,
-                hours: document.getElementById('dailyLaborHours').value,
-                isCharge: document.getElementById('isContractorCharge').value,
-                chargeName: document.getElementById('chargeContractorName').value
-            },
-            equipment: {
-                hasEquip: document.getElementById('hadEquipment').value === 'כן',
-                type: document.getElementById('equipType').value,
-                hours: document.getElementById('equipHours').value,
-                notes: document.getElementById('equipNotes').value
-            },
-            parkingWorks: document.getElementById('parkingWorks') ? document.getElementById('parkingWorks').value : ""
-        };
-
-        if (lot === 'מגרש 12') {
-            ["121", "122", "123", "124"].forEach(bld => {
-                formData['b' + bld + '_skeleton'] = document.getElementById('b' + bld + '_skeleton').value;
-                formData['b' + bld + '_blocks'] = document.getElementById('b' + bld + '_blocks').value;
-                formData['b' + bld + '_finishing'] = document.getElementById('b' + bld + '_finishing').value;
-                formData['b' + bld + '_plumbing'] = document.getElementById('b' + bld + '_plumbing').value;
-                formData['b' + bld + '_electrical'] = document.getElementById('b' + bld + '_electrical').value;
-            });
-        } else {
-            formData.skeletonDesc = document.getElementById('genSkeletonWorks').value;
-            formData.finishingDesc = document.getElementById('genFinishingWorks').value;
-            formData.blocksDesc = document.getElementById('genSubcontractors').value;
-        }
-
-        document.querySelectorAll('.pour-item').forEach(item => {
-            formData.pours.push({
-                building: item.querySelector('.pourBuilding').value,
-                floor: item.querySelector('.pourFloor').value,
-                element: item.querySelector('.pourElement').value,
-                type: item.querySelector('.pourConcreteType').value,
-                volume: item.querySelector('.pourVolume').value,
-                method: item.querySelector('.pourMethod').value,
-                docNum: item.querySelector('.pourDocNum').value,
-                notes: item.querySelector('.pourNotes').value
-            });
+          if (s) skelArr.push("בניין " + bld + ": " + s);
+          if (b) blockArr.push("בניין " + bld + ": " + b);
+          if (f) finishArr.push("בניין " + bld + ": " + f);
         });
 
-        const webAppUrl = "https://script.google.com/macros/s/AKfycbwwqDxRroJ_bVRTv7ysWWfNuisObDJLUmSe7RpfB89pqVdXJK_YFNtzjb0XLAoRSMmR/exec";
+        if (data.parkingWorks) {
+          finishArr.push("חניונים ומחסנים: " + data.parkingWorks);
+        }
 
-        fetch(webAppUrl, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData)
-        })
-        .then(() => {
-            alert('הסטטוס והנתונים נשלחו בהצלחה וסודרו בלשוניות האקסל!');
-        })
-        .catch(error => {
-            alert('שגיאה בשליחת הנתונים: ' + error);
-        });
+        skeletonDesc = skelArr.join(" | ");
+        blocksDesc = blockArr.join(" | ");
+        finishingDesc = finishArr.join(" | ");
+      } else {
+        // עבור מגרש 8
+        skeletonDesc = data.genSkeletonWorks || "";
+        finishingDesc = data.genFinishingWorks || "";
+        generalColumnM = data.genSubcontractors || ""; 
+      }
+
+      var rowDataSkeleton = [
+        data.lot,                  // א - מגרש
+        monthStr,                  // ב - חודש
+        data.reportDate,           // ג - תאריך
+        dayName,                   // ד - יום
+        data.skeletonCount || 0,   // ה - פועלי שלד
+        0,                         // ו - פועלים הודים
+        skeletonDesc,              // ז - תיאור שלד
+        data.finishCount || 0,     // ח - פועלי גמרים
+        finishingDesc,             // ט - תיאור גמר
+        "",                        // י - לחיוב קבלן
+        data.blockCount || 0,      // יא - פועלי בלוקים
+        blocksDesc,                // יב - תיאור בלוקים
+        generalColumnM             // יג (עמודה M) - כללי (קבלני משנה / מלאכות נוספות למגרש 8)
+      ];
+      
+      insertChronologically(sheetSkeleton, 3, rowDataSkeleton, 4);
     }
-</script>
 
-</body>
-</html>
+    // 4. מעקב כלי עפר וציוד
+    if (data.equipment && data.equipment.hasEquip && data.equipment.type) {
+      var sheetEquip = ss.getSheetByName("מעקב כלי עפר");
+      if (sheetEquip) {
+        var isLot8 = data.lot && data.lot.includes("8");
+        var dateColIndex = isLot8 ? 8 : 2;
+        var startCol = isLot8 ? 7 : 1;
+        
+        var rowDataEquip = ["", data.reportDate, data.equipment.type, data.equipment.hours, data.equipment.notes];
+        
+        var lastRow = sheetEquip.getLastRow();
+        var inserted = false;
+        var startRow = 4;
+        
+        if (lastRow >= startRow) {
+          var dates = sheetEquip.getRange(startRow, dateColIndex, lastRow - startRow + 1, 1).getValues();
+          for (var i = 0; i < dates.length; i++) {
+            if (!dates[i][0]) continue;
+            var currentDate = new Date(dates[i][0]);
+            if (!isNaN(currentDate.getTime()) && reportDate < currentDate) {
+              sheetEquip.insertRowBefore(startRow + i);
+              sheetEquip.getRange(startRow + i, startCol, 1, rowDataEquip.length).setValues([rowDataEquip]);
+              inserted = true;
+              break;
+            }
+          }
+        }
+        if (!inserted) {
+          var newRow = isLot8 ? 
+            ["", "", "", "", "", "", "", data.reportDate, data.equipment.type, data.equipment.hours, data.equipment.notes] : 
+            ["", data.reportDate, data.equipment.type, data.equipment.hours, data.equipment.notes];
+          sheetEquip.appendRow(newRow);
+        }
+      }
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({"status": "success"}))
+                .setMimeType(ContentService.MimeType.JSON);
+                
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": error.toString()}))
+                .setMimeType(ContentService.MimeType.JSON);
+  }
+}
