@@ -65,14 +65,14 @@
         button.remove-btn { background-color: var(--danger); font-size: 0.85rem; padding: 6px 10px; width: auto; margin-top: 5px; }
         textarea.out-box { background: #EBF5FB; font-family: monospace; direction: rtl; }
         
-        .pour-item {
+        .pour-item, .equip-item {
             background: #FAFAFA;
             border: 1px solid #E0E0E0;
             border-radius: 8px;
             padding: 12px;
             margin-bottom: 12px;
         }
-        .pour-header {
+        .item-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -216,6 +216,9 @@
 
             <h3>🚗 חניונים ומחסנים</h3>
             <textarea id="parkingWorks" rows="2" placeholder="פירוט עבודות בחניונים ובמחסנים"></textarea>
+
+            <h3>🛠️ עבודות כלליות וקבלני משנה</h3>
+            <textarea id="generalSubWorks12" rows="2" placeholder="פירוט עבודות כלליות וקבלני משנה מגרש 12"></textarea>
         </div>
 
         <!-- תתי פרקים כלליים למגרש 8 -->
@@ -277,7 +280,7 @@
         </div>
     </div>
 
-    <!-- חלק 5: כלי עפר וציוד -->
+    <!-- חלק 5: כלי עפר וציוד (דינמי) -->
     <div class="card">
         <h2>חלק 5: כלי עפר וציוד (מזין ישירות ל-מעקב כלי עפר.xlsx)</h2>
 
@@ -288,18 +291,8 @@
         </select>
 
         <div id="equipmentFields" class="hidden">
-            <div class="grid-2">
-                <div>
-                    <label>סוג הכלי / ציוד</label>
-                    <input type="text" id="equipType" placeholder="למשל: מחפרון / באגר">
-                </div>
-                <div>
-                    <label>שעות עבודה</label>
-                    <input type="text" id="equipHours" placeholder="למשל: 8 שעות">
-                </div>
-            </div>
-            <label>הערות / פירוט עבודה</label>
-            <input type="text" id="equipNotes" placeholder="הערות נוספות">
+            <div id="equipmentContainer"></div>
+            <button type="button" class="add-btn" onclick="addEquipmentItem()">➕ הוסף כלי עפר נוסף</button>
         </div>
     </div>
 
@@ -319,6 +312,25 @@
         </div>
     </div>
 
+    <!-- חלק 7: מעקב כוח אדם ומנהל עבודה -->
+    <div class="card">
+        <h2>חלק 7: מעקב כוח אדם ומנהל עבודה (מזין ל-מעקב כח אדם.xlsx)</h2>
+
+        <label>האם היה מנהל עבודה כ"א?</label>
+        <select id="foremanPresence" onchange="toggleForemanOptions(this.value)">
+            <option value="לא" selected>לא</option>
+            <option value="כן">כן</option>
+        </select>
+
+        <div id="foremanFields" class="hidden">
+            <label>היקף משרה / שעות</label>
+            <select id="foremanType">
+                <option value="יום שלם" selected>ימי חול (מעל 5 שעות)</option>
+                <option value="3 שעות">עד 3 שעות (16:00-19:00)</option>
+            </select>
+        </div>
+    </div>
+
     <!-- לחצן הפקת הודעה -->
     <button onclick="generateWhatsApp()">📱 צור הודעת WhatsApp</button>
 
@@ -334,6 +346,7 @@
 
 <script>
     let pourCount = 0;
+    let equipCount = 0;
 
     document.getElementById('reportDate').valueAsDate = new Date();
 
@@ -345,7 +358,7 @@
         div.id = `pour_item_${pourCount}`;
 
         div.innerHTML = `
-            <div class="pour-header">
+            <div class="item-header">
                 <span>🚛 יציקה #${pourCount}</span>
                 ${pourCount > 1 ? `<button type="button" class="remove-btn" onclick="removePourItem(${pourCount})">🗑️ הסר</button>` : ''}
             </div>
@@ -405,6 +418,39 @@
         if(item) item.remove();
     }
 
+    function addEquipmentItem(type = '', hours = '', notes = '') {
+        equipCount++;
+        const container = document.getElementById('equipmentContainer');
+        const div = document.createElement('div');
+        div.className = 'equip-item';
+        div.id = `equip_item_${equipCount}`;
+
+        div.innerHTML = `
+            <div class="item-header">
+                <span>🚜 כלי עפר #${equipCount}</span>
+                ${equipCount > 1 ? `<button type="button" class="remove-btn" onclick="removeEquipItem(${equipCount})">🗑️ הסר</button>` : ''}
+            </div>
+            <div class="grid-2">
+                <div>
+                    <label>סוג הכלי / ציוד</label>
+                    <input type="text" class="equipType" value="${type}" placeholder="למשל: מחפרון / באגר">
+                </div>
+                <div>
+                    <label>שעות עבודה</label>
+                    <input type="text" class="equipHours" value="${hours}" placeholder="למשל: 8 שעות">
+                </div>
+            </div>
+            <label>הערות / פירוט עבודה</label>
+            <input type="text" class="equipNotes" value="${notes}" placeholder="הערות נוספות">
+        `;
+        container.appendChild(div);
+    }
+
+    function removeEquipItem(id) {
+        const item = document.getElementById(`equip_item_${id}`);
+        if(item) item.remove();
+    }
+
     function toggleLotView() {
         const lot = document.getElementById('lot').value;
         if(lot === 'מגרש 12') {
@@ -423,6 +469,18 @@
             if(id === 'pourSectionFields' && document.querySelectorAll('.pour-item').length === 0) {
                 addPourItem();
             }
+            if(id === 'equipmentFields' && document.querySelectorAll('.equip-item').length === 0) {
+                addEquipmentItem();
+            }
+        } else {
+            el.classList.add('hidden');
+        }
+    }
+
+    function toggleForemanOptions(val) {
+        const el = document.getElementById('foremanFields');
+        if(val === 'כן') {
+            el.classList.remove('hidden');
         } else {
             el.classList.add('hidden');
         }
@@ -544,22 +602,39 @@
         }
 
         if(document.getElementById('hadEquipment').value === 'כן') {
-            const equip = document.getElementById('equipType').value.trim();
-            const equipHours = document.getElementById('equipHours').value.trim();
-            const equipNotes = document.getElementById('equipNotes').value.trim();
-            if(equip) {
-                msg += `🚜 *ציוד/כלי עפר:* ${equip}${equipHours ? ' (' + equipHours + ')' : ''}`;
-                if(equipNotes) msg += ` - ${equipNotes}`;
+            const equipItems = document.querySelectorAll('.equip-item');
+            if(equipItems.length > 0) {
+                msg += `🚜 *ציוד וכלי עפר:* \n`;
+                equipItems.forEach((item, index) => {
+                    const equip = item.querySelector('.equipType').value.trim();
+                    const equipHours = item.querySelector('.equipHours').value.trim();
+                    const equipNotes = item.querySelector('.equipNotes').value.trim();
+                    if(equip) {
+                        msg += `▪️ ${equip}${equipHours ? ' (' + equipHours + ')' : ''}`;
+                        if(equipNotes) msg += ` - ${equipNotes}`;
+                        msg += `\n`;
+                    }
+                });
                 msg += `\n`;
             }
         }
-        msg += `\n`;
 
         if(lot === 'מגרש 12') {
             const parking = document.getElementById('parkingWorks').value.trim();
             if(parking) {
                 msg += `🚗 *חניונים ומחסנים*\n${parking}\n\n`;
             }
+            const generalSubs12 = document.getElementById('generalSubWorks12').value.trim();
+            if(generalSubs12) {
+                msg += `🛠️ *עבודות כלליות וקבלני משנה*\n${generalSubs12}\n\n`;
+            }
+        }
+
+        // הוספת מעקב מנהל עבודה כ"א (סעיף 7) להודעת הוואטסאפ
+        const foremanPresence = document.getElementById('foremanPresence').value;
+        if(foremanPresence === 'כן') {
+            const foremanType = document.getElementById('foremanType').value;
+            msg += `👤 *מנהל עבודה כ"א:* כן (${foremanType})\n\n`;
         }
 
         msg += `👷 *כוח אדם*\n`;
@@ -590,6 +665,7 @@
             blockCount: document.getElementById('blockCount').value || "0",
             finishCount: document.getElementById('finishCount').value || "0",
             pours: [],
+            equipmentList: [],
             dailyLabor: {
                 hasLabor: document.getElementById('hadDailyLabor').value === 'כן',
                 count: document.getElementById('dailyLaborCount').value || "0",
@@ -599,13 +675,12 @@
                 isCharge: document.getElementById('isContractorCharge').value,
                 chargeName: document.getElementById('chargeContractorName').value
             },
-            equipment: {
-                hasEquip: document.getElementById('hadEquipment').value === 'כן',
-                type: document.getElementById('equipType').value,
-                hours: document.getElementById('equipHours').value,
-                notes: document.getElementById('equipNotes').value
+            foremanData: {
+                hasForeman: document.getElementById('foremanPresence').value,
+                foremanType: document.getElementById('foremanType').value
             },
             parkingWorks: document.getElementById('parkingWorks') ? document.getElementById('parkingWorks').value : "",
+            generalSubWorks12: document.getElementById('generalSubWorks12') ? document.getElementById('generalSubWorks12').value : "",
             genSkeletonWorks: document.getElementById('genSkeletonWorks') ? document.getElementById('genSkeletonWorks').value : "",
             genFinishingWorks: document.getElementById('genFinishingWorks') ? document.getElementById('genFinishingWorks').value : "",
             genSubcontractors: document.getElementById('genSubcontractors') ? document.getElementById('genSubcontractors').value : ""
@@ -631,6 +706,14 @@
                 method: item.querySelector('.pourMethod').value,
                 testTaken: item.querySelector('.pourTestTaken').value,
                 notes: item.querySelector('.pourNotes').value
+            });
+        });
+
+        document.querySelectorAll('.equip-item').forEach(item => {
+            formData.equipmentList.push({
+                type: item.querySelector('.equipType').value,
+                hours: item.querySelector('.equipHours').value,
+                notes: item.querySelector('.equipNotes').value
             });
         });
 
