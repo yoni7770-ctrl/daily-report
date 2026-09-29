@@ -365,7 +365,7 @@
             </div>
             <div class="grid-2">
                 <div>
-                    <label>סוג בטון</label>
+                    <label>סוג בטון / חומר</label>
                     <select class="pourConcreteType">
                         <option value="ב-30" ${type === 'ב-30' ? 'selected' : ''}>ב-30</option>
                         <option value="ב-40" ${type === 'ב-40' ? 'selected' : ''}>ב-40</option>
@@ -373,6 +373,7 @@
                         <option value="ב-50" ${type === 'ב-50' ? 'selected' : ''}>ב-50</option>
                         <option value="ב-60" ${type === 'ב-60' ? 'selected' : ''}>ב-60</option>
                         <option value="CLSM" ${type === 'CLSM' ? 'selected' : ''}>CLSM</option>
+                        <option value="מדה מתפלסת" ${type === 'מדה מתפלסת' ? 'selected' : ''}>מדה מתפלסת</option>
                     </select>
                 </div>
                 <div>
@@ -499,7 +500,7 @@
         if(document.getElementById('hadPour').value === 'כן') {
             const pourItems = document.querySelectorAll('.pour-item');
             if(pourItems.length > 0) {
-                msg += `🚛 *יציקות בטון שנערכו היום:*\n`;
+                msg += `🚛 *יציקות בטון / חומר שנערכו היום:*\n`;
                 let totalVol = 0;
                 pourItems.forEach((item, index) => {
                     const bld = item.querySelector('.pourBuilding').value.trim();
@@ -517,13 +518,13 @@
                     if(floor) details.push(`קומה ${floor}`);
                     if(elem) details.push(elem);
                     if(vol) details.push(`${vol} קוב`);
-                    if(type) details.push(`בטון ${type}`);
+                    if(type) details.push(type);
 
                     msg += details.join(' | ');
                     if(notes) msg += ` (${notes})`;
                     msg += `\n`;
                 });
-                if(totalVol > 0) msg += `📊 *סה"כ בטון שנצק:* ${totalVol} קוב\n`;
+                if(totalVol > 0) msg += `📊 *סה"כ כמות שנצקה:* ${totalVol} קוב\n`;
                 msg += `\n`;
             }
         }
